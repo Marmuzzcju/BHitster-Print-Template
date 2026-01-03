@@ -1,0 +1,70 @@
+body {
+    background-color: aqua;
+    margin: 0;
+    padding: 0;
+    font-size: 0px;
+}
+
+@font-face {
+    font-family: Abel;
+    src: url('Abel-Regular.ttf');
+}
+
+#import-trigger {
+    display: none;
+}
+
+#input {
+    position: fixed;
+    background: black;
+    color: white;
+    border-radius: 10px;
+    padding: 3px 4px;
+    border: 1px solid wheat;
+    cursor: pointer;
+}
+#input:hover {
+    background: #777;
+}
+
+#setting-anchor {
+    position: fixed;
+    font-size: 1rem;
+    top: 0;
+    left: 0;
+    z-index: 12;
+    border-radius: 3px;
+    border: 1px solid black;
+    background-color: #777;
+}
+#manual-input {
+    padding: 5px;
+}
+#manual-input > * {
+    border: 1px solid black;
+    padding: 1px
+}
+#manual-input input {
+    width: 150px;
+}
+#ready-page2print > button {
+    cursor: pointer;
+    background-color: rgba(250,250,250,0.4);
+    margin-left: .5rem;
+    margin-bottom: 2px;
+    font-size: 1.5rem;
+}
+#ready-page2print > button:hover {
+    background-color: rgba(250,250,250,0.1);
+    outline: 1px solid red;
+}
+
+canvas {
+    /*position: fixed;
+    top: 0;
+    left: 0;*/
+    background: rgb(230, 230, 230);
+    width: 100%;
+    padding: 0;
+    margin: 0 0;
+}

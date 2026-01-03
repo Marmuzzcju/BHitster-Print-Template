@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hitster Print Template</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <canvas id="canvas-page1"></canvas>
+    <canvas id="canvas-page2"></canvas>
+    <!--<div id="input" onclick="document.querySelector('#import-trigger').click();">Import File</div>-->
+    <div id="setting-anchor">
+        <div id="manual-input">
+            <span>Song Name: <input type="text"></span>
+            <span>Author Name: <input type="text"></span>
+            <span>Release Year: <input type="number"></span>
+            <span>Song Link: <input type="text"></span>
+            <button onclick="add_manual_card();">Add Card</button>
+        </div>
+        <div id="ready-page2print">
+            <button onclick="show_help_dialogue();">Help???</button>
+            <button onclick="ready_print_pages(true);">Ready Page to Print</button>
+        </div>
+        <!--<div id="page-format-test" onclick="test_print();">Page Format Test</div>-->
+    </div>
+    <div id="qr-code-element"></div>
+    <input type="file" accept=".ods" onchange="handle_file(this)" id="import-trigger">
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>
