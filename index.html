@@ -10,19 +10,26 @@
     <canvas id="canvas-page1"></canvas>
     <canvas id="canvas-page2"></canvas>
     <!--<div id="input" onclick="document.querySelector('#import-trigger').click();">Import File</div>-->
-    <div id="setting-anchor">
-        <div id="manual-input">
-            <span>Song Name: <input type="text"></span>
-            <span>Author Name: <input type="text"></span>
-            <span>Release Year: <input type="number"></span>
-            <span>Song Link: <input type="text"></span>
-            <button onclick="add_manual_card();">Add Card</button>
+    </div>
+    <div id="item-list-anchor">
+        <div id="item-list-header">
+            <span></span>
+            <span onclick="sort_list('song name')">Song Name</span>
+            <span onclick="sort_list('author name')">Author Name</span>
+            <span onclick="sort_list('release year')">Release Year</span>
+            <span onclick="sort_list('song link')">Song Link</span>
+        </div>
+        <div class="entry" id="manual-input">
+            <span><button onclick="add_manual_card();">Add</button></span>
+            <span><input type="text"></span>
+            <span><input type="text"></span>
+            <span><input type="text"></span>
+            <span><input type="text"></span>
         </div>
         <div id="ready-page2print">
             <button onclick="show_help_dialogue();">Help???</button>
             <button onclick="ready_print_pages(true);">Ready Page to Print</button>
         </div>
-        <!--<div id="page-format-test" onclick="test_print();">Page Format Test</div>-->
     </div>
     <div id="qr-code-element"></div>
     <input type="file" accept=".ods" onchange="handle_file(this)" id="import-trigger">

@@ -28,7 +28,11 @@ card_offset = 2,
 page_width  = 1000,
 page_height = 1420,
 page_amount = 2,
-UI_is_hidden= false;
+UI_is_hidden= false,
+card_count  = 0,
+currently_editing
+            = false,
+editing_card= 0;
 
 
 function setup(){
@@ -50,18 +54,99 @@ function add_card(spotify_link = 'Hello World', release_date = '2000', song_name
         date:   release_date,
         song:   song_name,
         author: author_name,
+        id:     card_count,
     }
 
     //create qr code from link
     appoint_qrImg_data(new_card.link, new_card);
 
     cards.push(new_card);
+
+    //add card to list
+    const anchor = document.querySelector('#manual-input');
+    let new_ele = `
+        <div class="entry">
+            <span><img src="img/edit.svg" onclick="edit_card(${card_count});"><img src="img/trash-can.svg"  onclick="delete_card(${card_count});"></span>
+            <span>${song_name}</span>
+            <span>${author_name}</span>
+            <span>${release_date}</span>
+            <span>${spotify_link}</span>
+        </div>`;
+    anchor.insertAdjacentHTML('beforebegin', new_ele);
+    
+    card_count++;
+}
+
+function delete_card(card_id){
+    if(!confirm('Are you sure you want to delete this card?')) return;
+
+    let index = card_id < cards.length ? card_id : cards.length-1;
+
+    while(cards[index].id != card_id && index) index--;
+    //danger =)
+
+    cards.splice(index, 1);
+    document.querySelectorAll('#item-list-anchor > *')[index+1].remove();
+
+    clear_print_pages();
+    setTimeout(ready_print_pages, 500);
+}
+
+function edit_card(card_id){
+    let index = card_id < cards.length ? card_id : cards.length-1,
+    identifier= ['link', 'date', 'author', 'song'];
+
+    while(cards[index].id != card_id && index) index--;
+
+    if(currently_editing){
+        //save
+        let element = 
+        document.querySelectorAll('#item-list-anchor > *')[editing_card+1],
+        values = [];
+        element.querySelectorAll('span').forEach((e, c) => {
+            if(c) {
+                values.splice(0, 0, e.querySelector('input').value);
+                e.remove();
+            }
+            else e.querySelector('img').src = 'img/edit.svg';
+        });
+        element = element.querySelector('span');
+        console.log(values);
+        identifier.forEach((a, c) => {
+            cards[editing_card][a] = values[c];
+            element.insertAdjacentHTML(`afterend`, `<span>${values[c]}</span>`);
+        });
+
+        clear_print_pages();
+        setTimeout(ready_print_pages, 500);
+
+        if(editing_card == index){
+            //exit
+            currently_editing = false;
+            return;
+        }
+    }
+    
+    currently_editing = true;
+    editing_card = index;
+
+    let element = 
+    document.querySelectorAll('#item-list-anchor > *')[index+1];
+    element.querySelectorAll('span').forEach((e, c) => {
+        if(c) e.remove();
+        else e.querySelector('img').src = 'img/save.svg';
+    });
+    element = element.querySelector('span');
+    identifier.forEach(a => {
+        element.insertAdjacentHTML(`afterend`, `<span><input type='text' value='${cards[index][a]}'></span>`);
+        console.log(a);
+    });
 }
 
 function add_manual_card(){
     const
     inputs = document.querySelectorAll('#manual-input input'),
-    error_msgs = ['Song Name must be a String', 'Authot Name must be a String', 'Release Year must be a Number', 'Song Link must be a String'];
+    error_msgs = ['Song Name must be a String', 'Author Name must be a String', 'Release Year must be a Number', 'Song Link must be a String'];
     let
     valid_input = true,
     input_values = [];
@@ -130,7 +215,7 @@ function clear_print_pages(){
 
 function ready_print_pages(hide_ui){
     if(hide_ui){
-        document.querySelector('#setting-anchor').style.display = 'none';
+        document.querySelector('#item-list-anchor').style.display = 'none';
         UI_is_hidden = true;
         alert(`Use "Ctrl + P" to print\nPress any other button to return the UI`);
     }
@@ -171,7 +256,7 @@ function show_help_dialogue(){
 
 window.addEventListener('keydown', e => {
     if(UI_is_hidden && ![17, 80].includes(e.keyCode)){
-        document.querySelector('#setting-anchor').style.display = 'inline';
+        document.querySelector('#item-list-anchor').style.display = 'inline';
         UI_is_hidden = false;
         console.log(e);
     }
