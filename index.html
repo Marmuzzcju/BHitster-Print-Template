@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hitster Print Template</title>
+    <link rel="icon" href="img/logo.png">
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -14,17 +15,17 @@
     <div id="item-list-anchor">
         <div id="item-list-header">
             <span></span>
-            <span onclick="sort_list('song name')">Song Name</span>
-            <span onclick="sort_list('author name')">Author Name</span>
-            <span onclick="sort_list('release year')">Release Year</span>
-            <span onclick="sort_list('song link')">Song Link</span>
+            <span onclick="sort_list('song')">Song</span>
+            <span onclick="sort_list('author')">Author Name</span>
+            <span onclick="sort_list('date')">Release Year</span>
+            <span onclick="sort_list('link')">Song Link</span>
         </div>
         <div class="entry" id="manual-input">
             <span><button onclick="add_manual_card();">Add</button></span>
-            <span><input type="text"></span>
-            <span><input type="text"></span>
-            <span><input type="text"></span>
-            <span><input type="text"></span>
+            <span><input type="text" onfocus="this.select();" placeholder="Song Name"></span>
+            <span><input type="text" onfocus="this.select();" placeholder="Author Name"></span>
+            <span><input type="text" onfocus="this.select();" placeholder="Release Year"></span>
+            <span><input type="text" onfocus="this.select();" placeholder="Song Link"></span>
         </div>
         <div id="ready-page2print">
             <button onclick="show_help_dialogue();">Help???</button>

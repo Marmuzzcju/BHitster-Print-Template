@@ -28,11 +28,11 @@ card_offset = 2,
 page_width  = 1000,
 page_height = 1420,
 page_amount = 2,
-UI_is_hidden= false,
-card_count  = 0,
-currently_editing
-            = false,
-editing_card= 0;
+UI_is_hidden    = false,
+card_count      = 0,
+currently_editing   = false,
+editing_card        = 0,
+list_sort_criterium = 'none';
 
 
 function setup(){
@@ -65,7 +65,7 @@ function add_card(spotify_link = 'Hello World', release_date = '2000', song_name
     //add card to list
     const anchor = document.querySelector('#manual-input');
     let new_ele = `
-        <div class="entry">
+        <div class="entry" id="card-entry-${card_count}">
             <span><img src="img/edit.svg" onclick="edit_card(${card_count});"><img src="img/trash-can.svg"  onclick="delete_card(${card_count});"></span>
             <span>${song_name}</span>
             <span>${author_name}</span>
@@ -86,7 +86,7 @@ function delete_card(card_id){
     //danger =)
 
     cards.splice(index, 1);
-    document.querySelectorAll('#item-list-anchor > *')[index+1].remove();
+    document.querySelector(`#card-entry-${card_id}`).remove();
 
     clear_print_pages();
     setTimeout(ready_print_pages, 500);
@@ -101,7 +101,7 @@ function edit_card(card_id){
     if(currently_editing){
         //save
         let element = 
-        document.querySelectorAll('#item-list-anchor > *')[editing_card+1],
+        document.querySelector(`#card-entry-${cards[editing_card].id}`),
         values = [];
         element.querySelectorAll('span').forEach((e, c) => {
             if(c) {
@@ -113,8 +113,49 @@ function edit_card(card_id){
         element = element.querySelector('span');
         console.log(values);
         identifier.forEach((a, c) => {
-            cards[editing_card][a] = values[c];
-            element.insertAdjacentHTML(`afterend`, `<span>${values[c]}</span>`);
+            console.log(`%c${a}: `, important_log_style);
+            console.log(`%c${values[c]}`, important_log_style);
+            if(a == 'link' && cards[editing_card][a] != values[c]){
+                //link was edited => qr code must be updated as well
+
+                let
+                link = values[c],
+                valid_link = false,
+                data_string = '';
+                if(['http', 'https'].includes(link.split(':')[0])){
+                    //web link
+                    if(link.split('/')[2].split('.').includes('spotify')){
+                        //spotify link
+                        valid_link = true;
+                        data_string += "spotify:";
+                        data_string += link.split('/').at(-2);
+                        data_string += ':';
+                        data_string += link.split('/').at(-1).split('?')[0];
+                    }
+                }
+                if(!valid_link && link.split(':').length == 3){
+                    if(['spotify'].includes(link.split(':')[0])){
+                        valid_link = true;
+                        data_string = link;
+                    }
+                }
+                if(!valid_link){
+                    valid_link = confirm(`This type of link might not be supported.\nChange anyway?`);
+                    data_string = link;
+                }
+                if(valid_link){
+                    cards[editing_card].link = data_string;
+                    appoint_qrImg_data(data_string, cards[editing_card]);
+                    element.insertAdjacentHTML(`afterend`, `<span>${data_string}</span>`);
+                } else {
+                    element.insertAdjacentHTML(`afterend`, `<span>${cards[editing_card].link}</span>`);
+                }
+
+
+            } else {
+                cards[editing_card][a] = values[c];
+                element.insertAdjacentHTML(`afterend`, `<span>${values[c]}</span>`);
+            }
         });
 
         clear_print_pages();
@@ -131,14 +172,14 @@ function edit_card(card_id){
     editing_card = index;
 
     let element = 
-    document.querySelectorAll('#item-list-anchor > *')[index+1];
+    document.querySelector(`#card-entry-${card_id}`);
     element.querySelectorAll('span').forEach((e, c) => {
         if(c) e.remove();
         else e.querySelector('img').src = 'img/save.svg';
     });
     element = element.querySelector('span');
     identifier.forEach(a => {
-        element.insertAdjacentHTML(`afterend`, `<span><input type='text' value='${cards[index][a]}'></span>`);
+        element.insertAdjacentHTML(`afterend`, `<span><input type='text' value='${cards[index][a]}' onfocus='this.select();' ></span>`);
         console.log(a);
     });
 }
@@ -150,10 +191,8 @@ function add_manual_card(){
     let
     valid_input = true,
     input_values = [];
-    //validate inout values
+    //validate input values
     inputs.forEach((i, idx) => {
-        console.log(i.value);
-        console.log(!!i.value);
         input_values[idx] = i.value;
         if(!i.value) {
             valid_input = false;
@@ -204,6 +243,71 @@ function appoint_qrImg_data(text, obj){
     });
     obj.qr_code = qrcode["_oDrawing"]["_elImage"];
     document.querySelector('#qr-code-element').innerHTML = '';
+}
+
+function sort_list(criterium){
+    //sort list by criterium ('song' = ' song name'; 'author'; 'date' = 'release year'; 'link');
+    let revert;
+    if(list_sort_criterium == criterium){
+        revert = true;
+        list_sort_criterium = 'revert';
+    } else {
+        revert = false;
+        list_sort_criterium = criterium;
+    }
+    const
+    sorted_index_list = [],
+    sorted_criterium_list = [];
+    cards.forEach((card, index) =>{
+        if(index){
+            let
+            position    = Math.floor(index / 2),
+            max_pos     = sorted_index_list.length-1,
+            weight      = criterium == 'date' ? Number(card[criterium]) : card[criterium].toUpperCase(),
+            up          = true,
+            finished    = false;
+            while(!finished){
+                //check for criterium
+                if(up){
+                    if(sorted_criterium_list[position] < weight){
+                        position++;
+                        if(position > max_pos) finished = true;
+                    } else up = false;
+                } else {
+                    if(sorted_criterium_list[position] > weight){
+                        if(!position) finished = true;
+                        else position--;
+                    } else {
+                        position++;
+                        finished = true;
+                    }
+                }
+            }
+            sorted_criterium_list.splice(position, 0, weight);
+            sorted_index_list.splice(position, 0, index);
+        } else {
+            sorted_index_list.push(0);
+            sorted_criterium_list.push(criterium == 'date' ? Number(card[criterium]) : card[criterium].toUpperCase());
+        }
+    });
+    let sorted_element_list = [];
+    sorted_index_list.forEach((index, count) => {
+        sorted_element_list.push(document.querySelector(`#card-entry-${index}`));
+    });
+    let last_element_id = revert ? 'manual-input' : 'item-list-header';
+    sorted_element_list.forEach((e, c) => {
+        document.querySelector(`#${last_element_id}`).insertAdjacentElement(revert ? 'beforebegin' : 'afterend', e);
+        last_element_id = e.id;
+    });
+    /*
+    console.log(`%cResults as below:`, important_log_style);
+    console.log(`%cUnsorted list:`, important_log_style);
+    console.log(cards);
+    console.log(`%cSorted weights:`, important_log_style);
+    console.log(sorted_criterium_list);
+    console.log(`%cSorted index:`, important_log_style);
+    console.log(sorted_index_list);*/
+    
 }
 
 
@@ -517,9 +621,9 @@ function draw_back(ctx, width, offset, card){
         }
     }
     author.y_offset = author.line_height * (author.line_amount-1) / -2;
-    console.log(`%c-- Author --\nY Offset: ${author.y_offset}\nLine Height: ${author.line_height}`, important_log_style);
+    /*console.log(`%c-- Author --\nY Offset: ${author.y_offset}\nLine Height: ${author.line_height}`, important_log_style);
     console.log(author.lines);
-    console.log(author.final_lines);
+    console.log(author.final_lines);*/
     author.final_lines.forEach((line, idx) => {
         ctx.fillText(line, offset.x + width/2, offset.y + width*0.2 + author.y_offset + author.line_height * (idx));
     });
